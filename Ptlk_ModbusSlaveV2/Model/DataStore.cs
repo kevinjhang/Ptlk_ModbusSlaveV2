@@ -5,9 +5,21 @@ namespace Ptlk_ModbusSlaveV2.Model
 {
     public class DataStore : ISlaveDataStore
     {
-        public DataStore(Action<ushort, ushort[]> writeHook)
+        public event PointSource<ushort>.ValueWritedHanlder ValueWrited
         {
-            m_holdingRegisters = new PointSource<ushort>(new ushort[65536], writeHook);
+            add
+            {
+                m_holdingRegisters.ValueWrited += value;
+            }
+            remove
+            {
+                m_holdingRegisters.ValueWrited -= value;
+            }
+        }
+
+        public DataStore()
+        {
+            m_holdingRegisters = new PointSource<ushort>(new ushort[65536]);
         }
 
         public IPointSource<bool> CoilDiscretes => throw new NotImplementedException();

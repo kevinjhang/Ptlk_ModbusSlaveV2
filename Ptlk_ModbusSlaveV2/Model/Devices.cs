@@ -43,9 +43,6 @@ namespace Ptlk_ModbusSlaveV2.Model {
 
   }
   #region Messages
-  /// <summary>
-  /// [START messages]
-  /// </summary>
   public sealed partial class Device : pb::IMessage<Device> {
     private static readonly pb::MessageParser<Device> _parser = new pb::MessageParser<Device>(() => new Device());
     private pb::UnknownFieldSet _unknownFields;

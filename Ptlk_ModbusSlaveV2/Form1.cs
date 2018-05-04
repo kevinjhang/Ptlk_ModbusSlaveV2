@@ -101,7 +101,6 @@ namespace Ptlk_ModbusSlaveV2
         #endregion
 
         #region UPDATE
-
         private void UpdateDevice(string name, int port, int id)
         {
             if (currentDevice == null) return;
@@ -110,25 +109,12 @@ namespace Ptlk_ModbusSlaveV2
             currentDevice.Id = id;
             currentDevice.Port = port;
         }
-
-        private void UpdateDataItemValue(Device device, int address, int value)
-        {
-            if (device == null) return;
-
-            var dataItem = device.DataItem.Where(i => i.Address == address).FirstOrDefault();
-            if (dataItem != null)
-            {
-                dataItem.Value = value;
-            }
-        }
-
         #endregion
 
         #endregion
 
         public Form1()
         {
-
             InitializeComponent();
 #if Release
             this.WindowState = FormWindowState.Minimized;
@@ -146,6 +132,8 @@ namespace Ptlk_ModbusSlaveV2
         private void SaveData()
         {
             SaveDevices();
+            toolStripStatusLabel_Status.Text = "Ready";
+            timer1.Stop();
         }
 
         private void newFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -226,16 +214,11 @@ namespace Ptlk_ModbusSlaveV2
         {
             modbusSlaveDataStoreList.Clear();
 
-            var count = modbusSlaveNetworkList.Count;
-
-            if (count > 0)
+            for (int i = 0; i < modbusSlaveNetworkList.Count; i++)
             {
-                for (int i = 0; i < count; i++)
-                {
-                    modbusSlaveNetworkList[i].Item1.Dispose();
-                    modbusSlaveNetworkList.RemoveAt(i);
-                }
+                modbusSlaveNetworkList[i].Item1.Dispose();
             }
+            modbusSlaveNetworkList.Clear();
 
             foreach (var device in SelectAllDevices())
             {
@@ -252,12 +235,14 @@ namespace Ptlk_ModbusSlaveV2
                     modbusSlaveNetworkList.Add(Tuple.Create(modebusSlave, device.Port));
                 }
 
-                var dataStore = new DataStore(WriteHook);
+                var dataStore = new DataStore();
 
                 foreach (var dataItem in SelectDataItemsOfDevice(device))
                 {
                     dataStore.HoldingRegisters.WritePoints((ushort)dataItem.Address, new[] { (ushort)dataItem.Value });
                 }
+
+                dataStore.ValueWrited += ValueWrited;
 
                 modebusSlave.AddSlave(modbusFactory.CreateSlave((byte)device.Id, dataStore));
 
@@ -265,14 +250,15 @@ namespace Ptlk_ModbusSlaveV2
 
                 modebusSlave.ListenAsync();
 
-                void WriteHook(ushort start, ushort[] values)
+                void ValueWrited(ushort start, ushort[] values)
                 {
                     foreach (var value in values)
                     {
                         var dataItem = device.DataItem.Where((i) => i.Address == start).FirstOrDefault();
-                        if (dataItem != null && dataItem.IsVolatile == false)
+                        if (dataItem != null && dataItem.Value != value && dataItem.IsVolatile == false)
                         {
-                            UpdateDataItemValue(device, start, value);
+                            dataItem.Value = value;
+                            panel1.Invoke((MethodInvoker)PrepareSaveData);
                         }
                         start++;
                     }
@@ -365,7 +351,6 @@ namespace Ptlk_ModbusSlaveV2
             if (MessageBox.Show($"Are you sure you want to delete device '{currentDevice.Name}' ?", appName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 DeleteDevices();
-
                 UpdateDeviceList();
             }
         }
@@ -393,12 +378,33 @@ namespace Ptlk_ModbusSlaveV2
         private void dataGridView1_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
         {
             var row = dataGridView1.Rows[e.RowIndex];
+            var value = e.FormattedValue.ToString();
 
             if (e.ColumnIndex >= 0 && e.ColumnIndex <= 2)
             {
-                if (string.IsNullOrEmpty(e.FormattedValue.ToString()))
+                if (string.IsNullOrEmpty(value))
                 {
-                    e.Cancel = true;
+                    dataGridView1.CancelEdit();
+                    return;
+                }
+            }
+
+            if (e.ColumnIndex >= 1 && e.ColumnIndex <= 2)
+            {
+                if (!int.TryParse(value, out _))
+                {
+                    dataGridView1.CancelEdit();
+                    return;
+                }
+            }
+
+            if (e.ColumnIndex == 2)
+            {
+                var isVolatileCell = row.Cells[3];
+                if ((bool)isVolatileCell.Value == true)
+                {
+                    dataGridView1.CancelEdit();
+                    return;
                 }
             }
         }
@@ -414,19 +420,26 @@ namespace Ptlk_ModbusSlaveV2
                 if (addressCell.Value != null && valueCell.Value != null)
                 {
                     WriteDataStore((int)addressCell.Value, (int)valueCell.Value);
+                    PrepareSaveData();
                 }
+            }
+
+            void WriteDataStore(int address, int value)
+            {
+                var tuple = modbusSlaveDataStoreList.FirstOrDefault((t) => t.Item2 == currentDevice);
+
+                if (tuple == null) return;
+
+                var dataStore = tuple.Item1;
+
+                dataStore.HoldingRegisters.WritePoints((ushort)address, new[] { (ushort)value });
             }
         }
 
-        private void WriteDataStore(int address, int value)
+        private void PrepareSaveData()
         {
-            var tuple = modbusSlaveDataStoreList.FirstOrDefault((t) => t.Item2 == currentDevice);
-
-            if (tuple == null) return;
-
-            var dataStore = tuple.Item1;
-
-            dataStore.HoldingRegisters.WritePoints((ushort)address, new[] { (ushort)value });
+            toolStripStatusLabel_Status.Text = "Prepare save";
+            timer1.Start();
         }
 
         private void NotifyIcon1_Click(object sender, EventArgs e)
@@ -449,13 +462,18 @@ namespace Ptlk_ModbusSlaveV2
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-#if Release
             if (e.CloseReason == CloseReason.UserClosing)
             {
+#if Release
                 Hide();
                 e.Cancel = true;
-            }
 #endif
+            }
+            SaveData();
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
             SaveData();
         }
 

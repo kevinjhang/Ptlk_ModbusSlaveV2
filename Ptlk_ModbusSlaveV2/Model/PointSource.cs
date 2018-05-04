@@ -8,10 +8,12 @@ namespace Ptlk_ModbusSlaveV2.Model
 {
     public class PointSource<T> : IPointSource<T>
     {
-        public PointSource(T[] points, Action<ushort, T[]> writeHook)
+        public delegate void ValueWritedHanlder(ushort start, T[] values);
+        public event ValueWritedHanlder ValueWrited;
+
+        public PointSource(T[] points)
         {
             m_points = points;
-            m_writeHook = writeHook;
         }
 
         public T[] ReadPoints(ushort startAddress, ushort numberOfPoints)
@@ -22,7 +24,7 @@ namespace Ptlk_ModbusSlaveV2.Model
         public void WritePoints(ushort startAddress, T[] points)
         {
             WriteBuffer(startAddress, points);
-            m_writeHook.Invoke(startAddress, points);
+            ValueWrited?.Invoke(startAddress, points);
         }
 
         #region Private
@@ -39,7 +41,6 @@ namespace Ptlk_ModbusSlaveV2.Model
         }
 
         private T[] m_points;
-        private Action<ushort, T[]> m_writeHook;
         #endregion
     }
 }
