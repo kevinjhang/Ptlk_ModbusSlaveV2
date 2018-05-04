@@ -1,0 +1,22 @@
+syntax = "proto3";
+package Ptlk_ModbusSlaveV2.Model;
+option csharp_namespace = "Ptlk_ModbusSlaveV2.Model";
+
+message Device {
+  string name = 1;
+  int32 port = 2;
+  int32 id = 3;
+
+  message DataItem {
+    string name = 1;
+    int32 address = 2;
+	int32 value = 3;
+	bool isVolatile = 4;
+  }
+
+  repeated DataItem dataItem = 4;
+}
+
+message Devices {
+  repeated Device device = 1;
+}
