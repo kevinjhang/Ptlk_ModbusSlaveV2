@@ -24,14 +24,14 @@ namespace Ptlk_ModbusSlaveV2.Model {
     static DevicesReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cg1kZXZpY2VzLnByb3RvEhhQdGxrX01vZGJ1c1NsYXZlVjIuTW9kZWwiuwEK",
+            "Cg1kZXZpY2VzLnByb3RvEhhQdGxrX01vZGJ1c1NsYXZlVjIuTW9kZWwivQEK",
             "BkRldmljZRIMCgRuYW1lGAEgASgJEgwKBHBvcnQYAiABKAUSCgoCaWQYAyAB",
-            "KAUSOwoIZGF0YUl0ZW0YBCADKAsyKS5QdGxrX01vZGJ1c1NsYXZlVjIuTW9k",
-            "ZWwuRGV2aWNlLkRhdGFJdGVtGkwKCERhdGFJdGVtEgwKBG5hbWUYASABKAkS",
-            "DwoHYWRkcmVzcxgCIAEoBRINCgV2YWx1ZRgDIAEoBRISCgppc1ZvbGF0aWxl",
-            "GAQgASgIIjsKB0RldmljZXMSMAoGZGV2aWNlGAEgAygLMiAuUHRsa19Nb2Ri",
-            "dXNTbGF2ZVYyLk1vZGVsLkRldmljZUIbqgIYUHRsa19Nb2RidXNTbGF2ZVYy",
-            "Lk1vZGVsYgZwcm90bzM="));
+            "KAUSPAoJZGF0YV9pdGVtGAQgAygLMikuUHRsa19Nb2RidXNTbGF2ZVYyLk1v",
+            "ZGVsLkRldmljZS5EYXRhSXRlbRpNCghEYXRhSXRlbRIMCgRuYW1lGAEgASgJ",
+            "Eg8KB2FkZHJlc3MYAiABKAUSDQoFdmFsdWUYAyABKAUSEwoLaXNfdm9sYXRp",
+            "bGUYBCABKAgiOwoHRGV2aWNlcxIwCgZkZXZpY2UYASADKAsyIC5QdGxrX01v",
+            "ZGJ1c1NsYXZlVjIuTW9kZWwuRGV2aWNlQhuqAhhQdGxrX01vZGJ1c1NsYXZl",
+            "VjIuTW9kZWxiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
@@ -113,7 +113,7 @@ namespace Ptlk_ModbusSlaveV2.Model {
       }
     }
 
-    /// <summary>Field number for the "dataItem" field.</summary>
+    /// <summary>Field number for the "data_item" field.</summary>
     public const int DataItemFieldNumber = 4;
     private static readonly pb::FieldCodec<global::Ptlk_ModbusSlaveV2.Model.Device.Types.DataItem> _repeated_dataItem_codec
         = pb::FieldCodec.ForMessage(34, global::Ptlk_ModbusSlaveV2.Model.Device.Types.DataItem.Parser);
@@ -320,7 +320,7 @@ namespace Ptlk_ModbusSlaveV2.Model {
           }
         }
 
-        /// <summary>Field number for the "isVolatile" field.</summary>
+        /// <summary>Field number for the "is_volatile" field.</summary>
         public const int IsVolatileFieldNumber = 4;
         private bool isVolatile_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

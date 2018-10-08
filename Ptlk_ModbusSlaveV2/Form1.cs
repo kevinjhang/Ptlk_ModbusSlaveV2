@@ -32,6 +32,7 @@ namespace Ptlk_ModbusSlaveV2
         private ModbusFactory modbusFactory = new ModbusFactory();
         private List<Tuple<IModbusSlaveNetwork, int>> modbusSlaveNetworkList = new List<Tuple<IModbusSlaveNetwork, int>>();
         private List<Tuple<DataStore, Device>> modbusSlaveDataStoreList = new List<Tuple<DataStore, Device>>();
+        private bool isChanged;
 
         #region Devices
 
@@ -40,6 +41,7 @@ namespace Ptlk_ModbusSlaveV2
         {
             if (!File.Exists(userConfigPath))
             {
+                Directory.CreateDirectory(Path.GetDirectoryName(userConfigPath));
                 File.Create(userConfigPath).Close();
             }
             using (Stream stream = File.OpenRead(userConfigPath))
@@ -134,6 +136,7 @@ namespace Ptlk_ModbusSlaveV2
             SaveDevices();
             toolStripStatusLabel_Status.Text = "Ready";
             timer1.Stop();
+            isChanged = false;
         }
 
         private void newFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -245,7 +248,7 @@ namespace Ptlk_ModbusSlaveV2
                 dataStore.ValueWrited += ValueWrited;
 
                 modebusSlave.AddSlave(modbusFactory.CreateSlave((byte)device.Id, dataStore));
-
+                
                 modbusSlaveDataStoreList.Add(Tuple.Create(dataStore, device));
 
                 modebusSlave.ListenAsync();
@@ -258,7 +261,11 @@ namespace Ptlk_ModbusSlaveV2
                         if (dataItem != null && dataItem.Value != value && dataItem.IsVolatile == false)
                         {
                             dataItem.Value = value;
-                            panel1.Invoke((MethodInvoker)PrepareSaveData);
+                            panel1.Invoke((MethodInvoker)(() =>
+                            {
+                                toolStripStatusLabel_Status.Text = "Prepare save";
+                                timer1.Start();
+                            }));
                         }
                         start++;
                     }
@@ -294,7 +301,7 @@ namespace Ptlk_ModbusSlaveV2
             }
         }
 
-        private void newDeviceToolStripMenuItem_Click(object sender, EventArgs e)
+        private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var dialog = new DeviceForm();
 
@@ -305,13 +312,14 @@ namespace Ptlk_ModbusSlaveV2
                 try
                 {
                     InsertDevice(dialog.Device_Name, int.Parse(dialog.Device_UnitId), int.Parse(dialog.Device_TcpPort));
+                    UpdateDeviceList();
+                    isChanged = true;
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, appName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    LoadData();
                 }
-
-                UpdateDeviceList();
             }
         }
 
@@ -330,17 +338,14 @@ namespace Ptlk_ModbusSlaveV2
                 try
                 {
                     UpdateDevice(dialog.Device_Name, int.Parse(dialog.Device_TcpPort), int.Parse(dialog.Device_UnitId));
-
-                    currentDevice.Name = dialog.Device_Name;
-                    currentDevice.Port = int.Parse(dialog.Device_TcpPort);
-                    currentDevice.Id = int.Parse(dialog.Device_UnitId);
+                    UpdateDeviceList();
+                    isChanged = true;
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, appName, MessageBoxButtons.OK, MessageBoxIcon.Warning); ;
+                    MessageBox.Show(ex.Message, appName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    LoadData();
                 }
-
-                UpdateDeviceList();
             }
         }
 
@@ -352,7 +357,18 @@ namespace Ptlk_ModbusSlaveV2
             {
                 DeleteDevices();
                 UpdateDeviceList();
+                isChanged = true;
             }
+        }
+
+        private void dataGridView1_UserAddedRow(object sender, DataGridViewRowEventArgs e)
+        {
+            isChanged = true;
+        }
+
+        private void dataGridView1_UserDeletedRow(object sender, DataGridViewRowEventArgs e)
+        {
+            isChanged = true;
         }
 
         private void dataGridView1_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
@@ -420,9 +436,10 @@ namespace Ptlk_ModbusSlaveV2
                 if (addressCell.Value != null && valueCell.Value != null)
                 {
                     WriteDataStore((int)addressCell.Value, (int)valueCell.Value);
-                    PrepareSaveData();
                 }
             }
+
+            isChanged = true;
 
             void WriteDataStore(int address, int value)
             {
@@ -436,10 +453,40 @@ namespace Ptlk_ModbusSlaveV2
             }
         }
 
-        private void PrepareSaveData()
+        private void dataGridView1_KeyPress(object sender, KeyPressEventArgs e)
         {
-            toolStripStatusLabel_Status.Text = "Prepare save";
-            timer1.Start();
+            if (e.KeyChar == 22)
+            {
+                string clipboard = Clipboard.GetText();
+                if (string.IsNullOrEmpty(clipboard)) return;
+
+                string[] lines = clipboard.Split('\n');
+
+                int currentRow = dataGridView1.CurrentCell.RowIndex;
+                int currentColumn = dataGridView1.CurrentCell.ColumnIndex;
+                int rowCount = dataGridView1.Rows.Count;
+
+                for (int i = 0; i < lines.Length - (rowCount - currentRow); i++)
+                {
+                    bindingSource1.AddNew();
+                }
+
+                foreach (string line in lines)
+                {
+                    string[] cells = line.Split('\t');
+                    for (int i = 0; i < cells.Length; i++)
+                    {
+                        dataGridView1[currentColumn + i, currentRow].Value = cells[i];
+                    }
+                    currentRow++;
+                }
+
+                if(lines.Length == 1)
+                {
+                    bindingSource1.AddNew();
+                    bindingSource1.RemoveCurrent();
+                }
+            }
         }
 
         private void NotifyIcon1_Click(object sender, EventArgs e)
@@ -464,12 +511,13 @@ namespace Ptlk_ModbusSlaveV2
         {
             if (e.CloseReason == CloseReason.UserClosing)
             {
-#if Release
                 Hide();
                 e.Cancel = true;
-#endif
             }
-            SaveData();
+            if (isChanged)
+            {
+                SaveData();
+            }
         }
 
         private void timer1_Tick(object sender, EventArgs e)

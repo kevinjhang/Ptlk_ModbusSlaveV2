@@ -6,4 +6,4 @@ D:\GitHub\Ptlk_ModbusSlaveV2\Ptlk_ModbusSlaveV2\obj\Release\Ptlk_ModbusSlaveV2.c
 D:\GitHub\Ptlk_ModbusSlaveV2\Ptlk_ModbusSlaveV2\obj\Release\Ptlk_ModbusSlaveV2.csproj.CoreCompileInputs.cache
 D:\GitHub\Ptlk_ModbusSlaveV2\Ptlk_ModbusSlaveV2\obj\Release\Ptlk_ModbusSlaveV2.exe
 D:\GitHub\Ptlk_ModbusSlaveV2\Ptlk_ModbusSlaveV2\obj\Release\Ptlk_ModbusSlaveV2.pdb
-D:\GitHub\Ptlk_ModbusSlaveV2\Ptlk_ModbusSlaveV2\obj\Release\Ptlk_ModbusSlaveV2.csprojResolveAssemblyReference.cache
+D:\GitHub\Ptlk_ModbusSlaveV2\Ptlk_ModbusSlaveV2\obj\Release\Ptlk_ModbusSlaveV2.csprojAssemblyReference.cache

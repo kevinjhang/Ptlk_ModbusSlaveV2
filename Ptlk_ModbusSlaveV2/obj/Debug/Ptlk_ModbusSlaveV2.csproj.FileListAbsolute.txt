@@ -1,5 +1,4 @@
 D:\GitHub\Ptlk_ModbusSlaveV2\Ptlk_ModbusSlaveV2\bin\Debug\Ptlk_ModbusSlaveV2.exe.config
-D:\GitHub\Ptlk_ModbusSlaveV2\Ptlk_ModbusSlaveV2\obj\Debug\Ptlk_ModbusSlaveV2.csprojResolveAssemblyReference.cache
 D:\GitHub\Ptlk_ModbusSlaveV2\Ptlk_ModbusSlaveV2\obj\Debug\Ptlk_ModbusSlaveV2.Form1.resources
 D:\GitHub\Ptlk_ModbusSlaveV2\Ptlk_ModbusSlaveV2\obj\Debug\Ptlk_ModbusSlaveV2.Properties.Resources.resources
 D:\GitHub\Ptlk_ModbusSlaveV2\Ptlk_ModbusSlaveV2\obj\Debug\Ptlk_ModbusSlaveV2.csproj.GenerateResource.cache
@@ -7,3 +6,4 @@ D:\GitHub\Ptlk_ModbusSlaveV2\Ptlk_ModbusSlaveV2\obj\Debug\Ptlk_ModbusSlaveV2.csp
 D:\GitHub\Ptlk_ModbusSlaveV2\Ptlk_ModbusSlaveV2\obj\Debug\Ptlk_ModbusSlaveV2.exe
 D:\GitHub\Ptlk_ModbusSlaveV2\Ptlk_ModbusSlaveV2\obj\Debug\Ptlk_ModbusSlaveV2.pdb
 D:\GitHub\Ptlk_ModbusSlaveV2\Ptlk_ModbusSlaveV2\obj\Debug\Ptlk_ModbusSlaveV2.View.DeviceForm.resources
+D:\GitHub\Ptlk_ModbusSlaveV2\Ptlk_ModbusSlaveV2\obj\Debug\Ptlk_ModbusSlaveV2.csprojAssemblyReference.cache

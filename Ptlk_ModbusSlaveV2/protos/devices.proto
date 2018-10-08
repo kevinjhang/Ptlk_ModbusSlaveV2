@@ -11,10 +11,10 @@ message Device {
     string name = 1;
     int32 address = 2;
 	int32 value = 3;
-	bool isVolatile = 4;
+	bool is_volatile = 4;
   }
 
-  repeated DataItem dataItem = 4;
+  repeated DataItem data_item = 4;
 }
 
 message Devices {
